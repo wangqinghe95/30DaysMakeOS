@@ -1,12 +1,18 @@
-all:
-	nasm helloos.asm -o helloos.bin
-	dd if=helloos.bin of=helloos.img bs=512
+DEL 	= rm -f
+
+all: haribote.img
+
+ipl.bin: ipl.asm
+	nasm -f bin -o ipl.bin ipl.asm
+
+haribote.img: ipl.bin
+	dd if=/dev/zero of=haribote.img bs=512 count=2880
+	dd if=ipl.bin of=haribote.img bs=512 count=1 conv=notrunc
+
+run: haribote.img
+	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy -boot a
+# 	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy
 
 clean:
-	rm -rf helloos.bin helloos.img
+	-$(DEL) ipl.bin haribote.img
 
-qemu: all
-	qemu-system-i386 helloos.img
-
-.PHONY:
-	all

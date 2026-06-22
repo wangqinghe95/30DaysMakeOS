@@ -1,8 +1,6 @@
 # Record
 
-## Day01
-
-### 1. helloos.asm 文件执行流程
+## Day02
 
 1. 计算机启动
    ↓
@@ -37,3 +35,24 @@
 ...     （RESB 填充 0，直到 0x1FD）
 0x1FE   55 AA                         ← 引导标志
 0x1FF   （文件结束，恰好 512 字节）
+
+## Day03
+
+### Day03-01
+
+```
+run: haribote.img
+	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy
+```
+
+报错：读不到 read disk error
+
+```
+run: haribote.img
+	qemu-system-x86_64 haribote.img
+   # 或者直接强制从A盘启动
+	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy -boot a
+
+```
+
+原因是检查第一个

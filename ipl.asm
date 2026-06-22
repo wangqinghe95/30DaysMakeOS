@@ -31,10 +31,28 @@ entry:
     MOV   SS, AX          ; 栈段寄存器设为 0
     MOV   SP, 0x7c00      ; 栈指针指向 0x7C00（栈向下生长）
     MOV   DS, AX          ; 数据段设为 0
-    MOV   ES, AX          ; 附加段设为 0
 
+; Disk read setup
 
-MOV   SI, msg         ; SI 指向字符串起始地址
+    ; set range of reading, (loading 0x8200)
+    MOV AX, 0x0820
+    MOV ES, AX
+
+    ; 柱头 0， 磁头0，扇区2
+    MOV CH, 0
+    MOV DH, 0
+    MOV CL, 2
+
+    ; 读取第一个扇区
+    MOV AH, 0x02
+    MOV AL, 1
+    MOV BX, 0
+    MOV DL, 0x00
+    INT 0x13
+    JC error
+
+error:
+    MOV   SI, msg         ; SI 指向字符串起始地址
 putloop:
   MOV   AL, [SI]      ; 从 SI 地址读取一个字节到 AL
   ADD   SI, 1         ; SI 指向下一个字符
