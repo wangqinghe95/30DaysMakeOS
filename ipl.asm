@@ -43,26 +43,38 @@ entry:
     MOV DH, 0
     MOV CL, 2
 
+    MOV SI, 0
+
+retry:
+
     ; 读取第一个扇区
-    MOV AH, 0x02
-    MOV AL, 1
-    MOV BX, 0
-    MOV DL, 0x00
-    INT 0x13
-    JC error
+    MOV   AH, 0x02
+    MOV   AL, 1
+    MOV   BX, 0
+    MOV   DL, 0x00
+    INT   0x13
+    JC    fin
+    ADD   SI, 1
+    CMP   SI, 5
+    JAE   error
+    MOV   AH, 0x00
+    MOV   DL, 0x00
+    INT   0x13
+    JMP   retry
 
 error:
     MOV   SI, msg         ; SI 指向字符串起始地址
-putloop:
-  MOV   AL, [SI]      ; 从 SI 地址读取一个字节到 AL
-  ADD   SI, 1         ; SI 指向下一个字符
-  CMP   AL, 0         ; 判断是否为字符串结束符（'\0'）
-  JE    fin           ; 如果是 0，跳转到 fin
 
-  MOV   AH, 0x0e      ; 设置 BIOS 显示功能号（0x0e = 字符输出）
-  MOV   BX, 15        ; 设置颜色属性（15 = 白色）
-  INT   0x10          ; 调用 BIOS 中断 0x10 显示字符
-  JMP   putloop       ; 继续下一个字符
+putloop:
+    MOV   AL, [SI]      ; 从 SI 地址读取一个字节到 AL
+    ADD   SI, 1         ; SI 指向下一个字符
+    CMP   AL, 0         ; 判断是否为字符串结束符（'\0'）
+    JE    fin           ; 如果是 0，跳转到 fin
+
+    MOV   AH, 0x0e      ; 设置 BIOS 显示功能号（0x0e = 字符输出）
+    MOV   BX, 15        ; 设置颜色属性（15 = 白色）
+    INT   0x10          ; 调用 BIOS 中断 0x10 显示字符
+    JMP   putloop       ; 继续下一个字符
 
 fin:
   HLT                     ; CPU停止，等待指令
@@ -75,7 +87,7 @@ msg:
   DB    0             ; 字符串结束符（C 风格 '\0'）
 
 
-RESB  0x1fe - ($ - $$)  ; 从当前位置填充到 0x1FE
+RESB	0x7dfe-0x7c00-($-$$)  ; 从当前位置填充到 0x1FE
 DB    0x55, 0xaa        ; 引导扇区有效标志
 
 ; $$	    当前段的起始地址	0x7C00

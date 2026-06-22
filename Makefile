@@ -11,8 +11,6 @@ haribote.img: ipl.bin
 
 run: haribote.img
 	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy -boot a
-# 	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy
-
 clean:
 	-$(DEL) ipl.bin haribote.img
 
