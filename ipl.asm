@@ -43,17 +43,17 @@ entry:
     MOV DH, 0
     MOV CL, 2
 
+readloop:
     MOV SI, 0
 
 retry:
-
     ; 读取第一个扇区
-    MOV   AH, 0x02
-    MOV   AL, 1
+    MOV   AH, 0x02      ; AH=0x02 读入磁盘
+    MOV   AL, 1         ; 读入1个扇区
     MOV   BX, 0
     MOV   DL, 0x00
     INT   0x13
-    JC    fin
+    JNC   next
     ADD   SI, 1
     CMP   SI, 5
     JAE   error
@@ -61,6 +61,14 @@ retry:
     MOV   DL, 0x00
     INT   0x13
     JMP   retry
+
+next:
+    MOV     AX, ES
+    ADD     AX, 0x0020
+    MOV     ES, AX
+    ADD     CL, 1
+    CMP     CL, 18
+    JBE     readloop
 
 error:
     MOV   SI, msg         ; SI 指向字符串起始地址
