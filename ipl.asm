@@ -1,6 +1,8 @@
 ; hello-os
 
-  ORG   0x7c00            ; 指明程序的装载地址
+CYLS	EQU		10
+
+    ORG   0x7c00            ; 指明程序的装载地址
 
 ; 用于标准FAT12格式的软盘
     JMP   entry             ;   0x00	3	EB 4E 90	跳转到入口（
@@ -69,6 +71,14 @@ next:
     ADD     CL, 1
     CMP     CL, 18
     JBE     readloop
+    MOV     CL, 1
+    ADD     DH, 1
+    CMP     DH, 2
+    JB      readloop
+    MOV     DH, 0
+    ADD     CH, 1
+    CMP     CH, CYLS
+    JB      readloop
 
 error:
     MOV   SI, msg         ; SI 指向字符串起始地址
