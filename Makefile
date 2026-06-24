@@ -5,13 +5,17 @@ all: haribote.img
 ipl.bin: ipl.asm
 	nasm -f bin -o ipl.bin ipl.asm
 
-haribote.img: ipl.bin
-	dd if=/dev/zero of=haribote.img bs=512 count=2880
-	dd if=ipl.bin of=haribote.img bs=512 count=1 conv=notrunc
-	printf "SECTOR_18" | dd of=haribote.img bs=512 seek=17 count=1 conv=notrunc
+haribote.sys : haribote.asm
+	nasm -f bin -o haribote.sys haribote.asm
+
+haribote.img: ipl.bin haribote.sys 
+	dd if=/dev/zero of=$@ bs=512 count=2880
+	mformat -f 1440 -i $@ ::
+	dd if=ipl.bin of=$@ bs=512 count=1 conv=notrunc
+	mcopy -i $@ haribote.sys ::/
 
 run: haribote.img
-	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy -boot a
+	qemu-system-x86_64 -drive file=$<,format=raw,if=floppy -boot a
 
 run-debug: haribote.img
 	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy -boot a -monitor stdio
@@ -20,8 +24,12 @@ run-dirve: haribote.img
 	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy
 
 run-gdb: haribote.img
-	qemu-system-x86_64 -drive file=haribote.img,format=raw,if=floppy -boot a -s -S
+	qemu-system-x86_64 -drive file=$<,format=raw,if=floppy -boot a -s -S
 
 clean:
-	-$(DEL) ipl.bin haribote.img 
+	-$(DEL) ipl.bin
+	-$(DEL) ipl.lst
+	-$(DEL) haribote.sys
+	-$(DEL) haribote.lst
+	-$(DEL) haribote.img
 

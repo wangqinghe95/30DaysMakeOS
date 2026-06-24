@@ -80,6 +80,8 @@ next:
     CMP     CH, CYLS
     JB      readloop
 
+    JMP     0xc200
+
 error:
     MOV   SI, msg         ; SI 指向字符串起始地址
 
