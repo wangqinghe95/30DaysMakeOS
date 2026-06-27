@@ -1,10 +1,10 @@
 NASM = nasm
-CC = i686-linux-gnu-gcc
-AS = i686-linux-gnu-as
-LD = i686-linux-gnu-ld
-CFLAGS = -ffreestanding -nostdlib -nostartfiles
-LDFLAGS = -Ttext 0x1000
-DEL 	= rm -f
+CC 			= 		i686-linux-gnu-gcc
+AS 			= 		i686-linux-gnu-as
+LD 			= 		i686-linux-gnu-ld
+CFLAGS 		= 		-ffreestanding -nostdlib -nostartfiles
+LDFLAGS 	= 		-Ttext 0x1000
+DEL 		= 		rm -f
 
 
 all: haribote.img
@@ -16,11 +16,16 @@ asmhead.bin : asmhead.asm
 	$(NASM) -f bin -o asmhead.bin asmhead.asm
 
 bootpack.bin : bootpack.c
-	$(CC) -S $< -o bootpack.s
-	$(AS) bootpack.s -o bootpack.o
-	$(LD) bootpack.o -o bootpack.bin
+# 	$(CC) -S $(CFLAGS) $< -o bootpack.s
+# 	$(AS) bootpack.s -o bootpack.o
+# 	$(LD) bootpack.o -o bootpack.bin
 
-haribote.sys : asmhead.bin bootpack.bin
+	$(CC) $(CFLAGS) -c $< -o bootpack.bin
+
+naskfunc.obj : naskfunc.asm
+	$(NASM) -f bin -o naskfunc.obj naskfunc.asm
+
+haribote.sys : asmhead.bin bootpack.bin naskfunc.obj 
 	cat $^ > $@
 
 haribote.img: ipl.bin haribote.sys 
