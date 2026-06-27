@@ -1,12 +1,27 @@
+NASM = nasm
+CC = i686-linux-gnu-gcc
+AS = i686-linux-gnu-as
+LD = i686-linux-gnu-ld
+CFLAGS = -ffreestanding -nostdlib -nostartfiles
+LDFLAGS = -Ttext 0x1000
 DEL 	= rm -f
+
 
 all: haribote.img
 
 ipl.bin: ipl.asm
-	nasm -f bin -o ipl.bin ipl.asm
+	$(NASM) -f bin -o ipl.bin ipl.asm
 
-haribote.sys : haribote.asm
-	nasm -f bin -o haribote.sys haribote.asm
+asmhead.bin : asmhead.asm
+	$(NASM) -f bin -o asmhead.bin asmhead.asm
+
+bootpack.bin : bootpack.c
+	$(CC) -S $< -o bootpack.s
+	$(AS) bootpack.s -o bootpack.o
+	$(LD) bootpack.o -o bootpack.bin
+
+haribote.sys : asmhead.bin bootpack.bin
+	cat $^ > $@
 
 haribote.img: ipl.bin haribote.sys 
 	dd if=/dev/zero of=$@ bs=512 count=2880
@@ -27,9 +42,10 @@ run-gdb: haribote.img
 	qemu-system-x86_64 -drive file=$<,format=raw,if=floppy -boot a -s -S
 
 clean:
-	-$(DEL) ipl.bin
-	-$(DEL) ipl.lst
+	-$(DEL) *.bin
+	-$(DEL) *.elf
+	-$(DEL) *.o
+	-$(DEL) bootpack.s
 	-$(DEL) haribote.sys
-	-$(DEL) haribote.lst
 	-$(DEL) haribote.img
 
