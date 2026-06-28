@@ -1,5 +1,9 @@
 *.bin
 *.img
+*.sys
+*.obj
+*.map
+*.lst
+
 test/*
-haribote.sys
-naskfunc.obj
+bootpack.hrb

@@ -75,7 +75,6 @@ pipelineflush:
 		CALL	memcpy
 
 
-
 		MOV		EBX,BOTPAK
 		MOV		ECX,[EBX+16]
 		ADD		ECX,3		
@@ -118,7 +117,3 @@ GDTR0:
 
 		ALIGNB	16
 bootpack:
-
-fin:
-    HLT
-    JMP fin

@@ -80,6 +80,7 @@ next:
     CMP     CH, CYLS
     JB      readloop
 
+    MOV     [0xff0],CH
     JMP     0xc200
 
 error:
