@@ -30,3 +30,19 @@ Day2的代码，也就是 helloos.asm 完成了一个简单的汇编启动代码
 ### 09 开始导入C语言
 
 添加 bootpack.c 引入 C 文件
+
+### 10 实现HLT（harib00j）
+
+在 naskfunc.asm 文件中添加 hlt 汇编代码
+
+## Day04
+
+### 01 用C语言实现内存写入（harib01a）
+
+naskfunc.asm 文件添加 write_mem8 汇编代码，修改 VGA 内存数据，将窗口渲染成全白
+验证前面的文件结构的地址分配，Make 文件正常运行
+
+### 02 条纹图案（harib01b）
+
+修改 VGA 内存数据，将窗口修改成条纹图案
+
