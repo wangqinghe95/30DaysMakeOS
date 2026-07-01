@@ -10,6 +10,8 @@ void set_palette(int start, int end, unsigned char* rgp);
 void boxfill8(unsigned char* vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
 void init_screen(char* vram, int x, int y);
 
+void putfont8(char *vram, int xsize, int x, int y, char c, char* font);
+
 #define COL8_000000      0
 #define COL8_FF0000      1
 #define COL8_00FF00      2
@@ -34,21 +36,43 @@ struct BOOTINFO
     char *vram;
 };
 
+
 void HariMain(void)
 {
-    char *vram;
-    int xsize, ysize;
-    struct BOOTINFO *binfo;
+    struct BOOTINFO *binfo = (struct BOOTINFO*) 0x0ff0;
 
-    binfo = (struct BOOTINFO*) 0x0ff0;
+    static char font_A[16] = {
+        0x00, 0x18, 0x18, 0x18, 0x18, 0x24, 0x24, 0x24,
+        0x24, 0x7e, 0x42, 0x42, 0x42, 0xe7, 0x00, 0x00
+    };
 
 	init_palette();
 
     init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
+    putfont8(binfo->vram, binfo->scrnx, 10, 10, COL8_FFFFFF, font_A);
 
 	for (;;) {
 		io_hlt();
 	}
+}
+
+void putfont8(char *vram, int xsize, int x, int y, char c, char* font)
+{
+    int i;
+    char d, *p;
+    for(i = 0; i < 16; i++) {
+        p = vram + (y+i) * xsize + x;
+        d = font[i];
+        if((d & 0x80) != 0) p[0] = c;
+        if((d & 0x40) != 0) p[1] = c;
+        if((d & 0x20) != 0) p[2] = c;
+        if((d & 0x10) != 0) p[3] = c;
+        if((d & 0x08) != 0) p[4] = c;
+        if((d & 0x04) != 0) p[5] = c;
+        if((d & 0x02) != 0) p[6] = c;
+        if((d & 0x01) != 0) p[7] = c;
+    }
+    return;
 }
 
 void init_screen(char* vram, int x, int y)
