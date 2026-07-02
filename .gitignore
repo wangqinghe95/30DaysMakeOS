@@ -4,6 +4,10 @@
 *.obj
 *.map
 *.lst
+*.elf
+*.o
+*.s
 
 test/*
 bootpack.hrb
+utils/makefont
