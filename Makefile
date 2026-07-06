@@ -21,6 +21,7 @@ DEL 		= 		rm -f
 
 UTILS_FOLDER := ./utils
 MAKEFONT := $(UTILS_FOLDER)/makefont
+CFLAGS += -I$(UTILS_FOLDER)/libc/include
 
 IMG = haribote.img
 
@@ -47,7 +48,10 @@ bootpack.o : bootpack.c
 asmhead.bin : asmhead.asm
 	$(NASM) -f bin -o $@ $< -l $(basename $@).lst
 
-bootpack.hrb: bootpack.o naskfunc.elf hankaku.elf
+stdio.obj : $(UTILS_FOLDER)/libc/src/stdio.c 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+bootpack.hrb: bootpack.o naskfunc.elf hankaku.elf stdio.obj
 	$(LD) $(LDFLAGS) --oformat binary -o $@ --defsym=STACK_SIZE=3136*1024 -T $(HRB_LDS) $^ -Map $(basename $@).map
 
 haribote.sys : asmhead.bin bootpack.hrb
