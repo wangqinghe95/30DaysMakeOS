@@ -67,3 +67,15 @@ _io_store_eflags:
 	PUSH 	EAX
 	POPFD
 	RET
+
+_load_gdtr:
+	MOV		AX, [ESP+4]
+	MOV		[ESP+6],AX
+	LGDT	[ESP+6]
+	RET
+
+_load_idtr:
+	MOV		AX,[ESP+4]
+	MOV		[ESP+6], AX
+	LIDT	[ESP+6]
+	RET
