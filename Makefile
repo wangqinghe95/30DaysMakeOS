@@ -16,7 +16,14 @@ CFLAGS = -fleading-underscore \
 		 -mtune=i486 -march=i486 \
 		 -masm=intel
 
-LDFLAGS 	=	-m elf_i386
+ifdef DEBUG
+QEMU_FLAGS += -s -S 
+QEMU_FLAGS += -monitor stdio
+CFLAGS += -g
+NAMS_FLAGS += -F dwarf -g 
+endif
+
+LDFLAGS 	=		-m elf_i386
 DEL 		= 		rm -f
 
 UTILS_FOLDER := ./utils
@@ -27,31 +34,29 @@ IMG = haribote.img
 
 all: $(IMG)
 
-
 ipl.bin: ipl.asm
-	$(NASM) -f bin -o ipl.bin ipl.asm
+	$(NASM) -f bin -o $@ $< -l $(basename $@).lst
 
 naskfunc.elf : naskfunc.asm
-	$(NASM) -f elf32 -o $@ $< -l $(basename $@).lst
+	$(NASM) $(NAMS_FLAGS) -f elf32 -o $@ $< -l $(basename $@).lst
 
 hankaku.asm : hankaku.txt
 	gcc -o $(MAKEFONT) $(UTILS_FOLDER)/makefont.c 
 	$(MAKEFONT) -i $< -o $@ -f 1
 
 hankaku.elf : hankaku.asm
-	$(NASM) -f elf32 -o $@ $< -l hakaku.lst
+	$(NASM) $(NAMS_FLAGS) -f elf32 -o $@ $< -l $(basename $@).lst
 
-bootpack.o : bootpack.c
-	$(CC) $(CFLAGS) -S $< -o bootpack.s 
-	$(CC) $(CFLAGS) -c bootpack.s -o $@
+OBJ_FILES := bootpack.obj stdio.obj dsctbl.obj graphic.obj
+
+%.obj : %.c 
+	$(CC) $(CFLAGS) -c $< -o $@
+vpath %.c $(UTILS_FOLDER)/libc/src
 
 asmhead.bin : asmhead.asm
 	$(NASM) -f bin -o $@ $< -l $(basename $@).lst
 
-stdio.obj : $(UTILS_FOLDER)/libc/src/stdio.c 
-	$(CC) $(CFLAGS) -c $< -o $@
-
-bootpack.hrb: bootpack.o naskfunc.elf hankaku.elf stdio.obj
+bootpack.hrb: naskfunc.elf hankaku.elf $(OBJ_FILES)
 	$(LD) $(LDFLAGS) --oformat binary -o $@ --defsym=STACK_SIZE=3136*1024 -T $(HRB_LDS) $^ -Map $(basename $@).map
 
 haribote.sys : asmhead.bin bootpack.hrb
@@ -87,4 +92,7 @@ clean:
 	-$(DEL) bootpack.s
 	-$(DEL) haribote.sys
 	-$(DEL) haribote.img
+	-$(DEL) hankaku.asm
+
+.PHONY: all run
 
