@@ -52,7 +52,7 @@ void init_mouse_cursor8(char *mouse, char bc)
 	return;
 }
 
-void putfont8_asc(char *vram, int xsize, int x, int y, char c, char* s)
+void putfonts8_asc(char *vram, int xsize, int x, int y, char c, char* s)
 {
     extern char hankaku[4096];
     for(; *s != 0x00; s++) {
@@ -81,7 +81,7 @@ void putfont8(char *vram, int xsize, int x, int y, char c, char* font)
     return;
 }
 
-void init_screen(char* vram, int x, int y)
+void init_screen8(char* vram, int x, int y)
 {
 
     boxfill8(vram, x, COL8_008484,  0,         0,           x -  1, y - 29);

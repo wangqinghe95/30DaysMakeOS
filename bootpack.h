@@ -18,11 +18,15 @@ struct BOOTINFO
 /** naskfunc.asm  start ******/
 void io_hlt(void);
 void io_cli(void);
+void io_sti(void);
 void io_out8(int port, int data);
 int io_load_eflags(void);
 void io_store_eflags(int eflags);
 void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
+void asm_inthandler21(void);
+void asm_inthandler2c(void);
+void asm_inthandler27(void);
 /** naskfunc.asm  end ******/
 
 
@@ -31,11 +35,11 @@ void init_palette(void);
 void set_palette(int start, int end, unsigned char* rgp);
 
 void boxfill8(char* vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
-void init_screen(char* vram, int x, int y);
+void init_screen8(char* vram, int x, int y);
 
 void putfont8(char *vram, int xsize, int x, int y, char c, char* font);
 
-void putfont8_asc(char *vram, int xsize, int x, int y, char c, char* s);
+void putfonts8_asc(char *vram, int xsize, int x, int y, char c, char* s);
 
 void init_mouse_cursor8(char *mouse, char bc);
 void putblock8_8(char *vram, int vxsize, int pxsize,
@@ -84,10 +88,11 @@ void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 #define LIMIT_IDT           0x000007ff
 #define ADR_GDT             0x00270000
 #define LIMIT_GDT           0x0000ffff
-#define ADR_BOTPAK          0x28000000
+#define ADR_BOTPAK          0x00280000
 #define LIMIT_BOTPAK        0x0007ffff
 #define AR_DATA32_RW        0x4092
 #define AR_CODE32_ER        0x409a
+#define AR_INTGATE32        0x008e
 
 /********* dsctbl.c end *************/
 
