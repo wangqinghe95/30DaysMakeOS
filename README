@@ -122,3 +122,7 @@ IDT：interrupt descriptor table，中断几率表
 01 将 bootpack.c 代码分割成 dectbl.c 和 graphic.c 内容
 02 修改 Makefile 适配项目内容
 03 整理头文件，将三个c文件共同需要使用的函数声明和全局变量放入到 bootpack.h 文件中
+
+### 04 初始化PIC（harib03d）
+
+添加中段向量表
