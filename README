@@ -128,3 +128,9 @@ IDT：interrupt descriptor table，中断几率表
 添加中段向量表
 
 ### 06 中断处理程序的制作（harib03e）
+
+## Day07
+
+### 01 获取按键编码（hiarib04a）
+
+屏幕上显示键盘按键的编码（监听键盘事件）
