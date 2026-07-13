@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include "bootpack.h"
 
+extern struct KEYBUF    keybuf;
+
 void HariMain(void)
 {
     struct BOOTINFO *binfo = (struct BOOTINFO*) 0x0ff0;
@@ -29,7 +31,18 @@ void HariMain(void)
     io_out8(PIC1_IMR, 0xef);
 
 	for (;;) {
-		io_hlt();
+		io_cli();
+        if(keybuf.flag == 0) {
+            io_stihlt();
+        }
+        else {
+            int data = keybuf.data;
+            keybuf.flag = 0;
+            io_sti();
+            sprintf(s, "%02X", data);
+            boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
+            putfonts8_asc(binfo->vram, binfo->scrnx, 0, 16, COL8_FFFFFF, s);
+        }
 	}
 }
 
