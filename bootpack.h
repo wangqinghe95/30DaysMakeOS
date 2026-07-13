@@ -102,7 +102,8 @@ void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 
 struct KEYBUF
 {
-    char data, flag;
+    char data[32];
+    int next;
 };
 
 void init_pic(void);
