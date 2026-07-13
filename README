@@ -144,3 +144,7 @@ IDT：interrupt descriptor table，中断几率表
 ### 03 制作FIFO缓冲区（hiarib04c）
 
 使用32位数组来保持一个监听事件事件中的传送过来的多个数据
+
+### 04 改善FIFO缓冲区（hiarib04d)
+
+使用循环数组来使用缓存区数组

@@ -32,14 +32,15 @@ void HariMain(void)
 
 	for (;;) {
 		io_cli();
-        if(keybuf.next == 0) {
+        if(keybuf.len == 0) {
             io_stihlt();
         }
         else {
-            int data = keybuf.data[0];
-            keybuf.next--;
-            for(int j = 0; j < keybuf.next; j++) {
-                keybuf.data[j] = keybuf.data[j+1];
+            int data = keybuf.data[keybuf.next_r];
+            keybuf.len--;
+            keybuf.next_r++;
+            if(keybuf.next_r == 32) {
+                keybuf.next_r = 0;
             }
             io_sti();
             sprintf(s, "%02X", data);
