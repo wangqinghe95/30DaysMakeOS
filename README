@@ -148,3 +148,7 @@ IDT：interrupt descriptor table，中断几率表
 ### 04 改善FIFO缓冲区（hiarib04d)
 
 使用循环数组来使用缓存区数组
+
+### 05 整理FIFO缓冲区（hiarib04e）
+
+将缓冲区操作整理为初始化，传值，取值函数

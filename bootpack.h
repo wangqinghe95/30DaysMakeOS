@@ -31,6 +31,21 @@ void asm_inthandler2c(void);
 void asm_inthandler27(void);
 /** naskfunc.asm  end ******/
 
+/****** fifo.c start  ********/
+
+struct FIFO8
+{
+    char *buf;
+    int p, q, size, free, flags;
+};
+
+void fifo_init(struct FIFO8* fifo, int size, char* buf);
+int fifo_put(struct FIFO8* fifo, char data);
+int fifo_get(struct FIFO8* fifo);
+int fifo_status(struct FIFO8* fifo);
+
+/****** fifo.c end ********/
+
 
 /********* graph.c start *************/
 void init_palette(void);
