@@ -35,14 +35,14 @@ void asm_inthandler27(void);
 
 struct FIFO8
 {
-    char *buf;
+    unsigned char *buf;
     int p, q, size, free, flags;
 };
 
-void fifo_init(struct FIFO8* fifo, int size, char* buf);
-int fifo_put(struct FIFO8* fifo, char data);
-int fifo_get(struct FIFO8* fifo);
-int fifo_status(struct FIFO8* fifo);
+void fifo8_init(struct FIFO8* fifo, int size, char* buf);
+int fifo8_put(struct FIFO8* fifo, char data);
+int fifo8_get(struct FIFO8* fifo);
+int fifo8_status(struct FIFO8* fifo);
 
 /****** fifo.c end ********/
 

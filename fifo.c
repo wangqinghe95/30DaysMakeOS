@@ -2,7 +2,7 @@
 
 #define FLAGS_OVERRUN       0x0001
 
-void fifo_init(struct FIFO8* fifo, int size, char* buf)
+void fifo8_init(struct FIFO8* fifo, int size, char* buf)
 {
     fifo->size = size;
     fifo->buf = buf;
@@ -10,7 +10,7 @@ void fifo_init(struct FIFO8* fifo, int size, char* buf)
     fifo->p = fifo->q = fifo->flags = 0;
     return;
 }
-int fifo_put(struct FIFO8* fifo, char data)
+int fifo8_put(struct FIFO8* fifo, char data)
 {
     if(fifo->free == 0) {
         fifo->flags |= FLAGS_OVERRUN;
@@ -26,7 +26,7 @@ int fifo_put(struct FIFO8* fifo, char data)
     fifo->free--;
     return 0;
 }
-int fifo_get(struct FIFO8* fifo)
+int fifo8_get(struct FIFO8* fifo)
 {
     if(fifo->free == fifo->size) {
         return -1;
@@ -41,7 +41,7 @@ int fifo_get(struct FIFO8* fifo)
     return data;
 }
 
-int fifo_status(struct FIFO8* fifo)
+int fifo8_status(struct FIFO8* fifo)
 {
     return fifo->size - fifo->free;
 }
