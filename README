@@ -152,3 +152,7 @@ IDT：interrupt descriptor table，中断几率表
 ### 05 整理FIFO缓冲区（hiarib04e）
 
 将缓冲区操作整理为初始化，传值，取值函数
+
+### 06 总算讲到鼠标了（harib04f）
+
+实现鼠标的中断触发事件，调用鼠标中断处理函数
