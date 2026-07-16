@@ -77,6 +77,25 @@ void HariMain(void)
                     }
                     boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 32, 16, 32+15*8-1, 31);
                     putfonts8_asc(binfo->vram, binfo->scrnx, 32, 16, COL8_FFFFFF, s);
+                    
+                    // move mouse
+                    boxfill8(binfo->vram, binfo->scrnx, COL8_008484, mx, my, mx+15, my+15);
+                    mx += mdec.x;
+                    my += mdec.y;
+
+                    mx = mx < 0 ? 0 : mx;
+                    my = my < 0 ? 0 : my;
+
+                    mx = mx > binfo->scrnx - 16 ? binfo->scrnx - 16 : mx;
+                    my = mx > binfo->scrny - 16 ? binfo->scrny - 16 : mx;
+
+                    sprintf(s, "(%3d %3d)", mx, my);
+                    boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 0, 79, 15);
+                    putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+                    putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
+
+
+                    
                 }
             }
         }
