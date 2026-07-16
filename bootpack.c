@@ -39,6 +39,8 @@ void HariMain(void)
     putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 
     enable_mouse();
+    int mouse_phase = 0;
+    unsigned char mouse_dbuf[3];
 
 	for (;;) {
 		io_cli();
@@ -55,10 +57,24 @@ void HariMain(void)
             }
             else if(fifo8_status(&mousefifo) != 0) {
                 int data = fifo8_get(&mousefifo);
-                io_sti();
-                sprintf(s, "%02X", data);
-                boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 32, 16, 47, 31);
-                putfonts8_asc(binfo->vram, binfo->scrnx, 32, 16, COL8_FFFFFF, s);
+                if(mouse_phase == 0) {
+                    if(data == 0xfa) mouse_phase = 1;
+                }
+                else if(mouse_phase == 1) {
+                    mouse_dbuf[0] = data;
+                    mouse_phase = 2;
+                }
+                else if(mouse_phase == 2) {
+                    mouse_dbuf[1] = data;
+                    mouse_phase = 3;
+                }
+                else if(mouse_phase == 3) {
+                    mouse_dbuf[2] = data;
+                    mouse_phase = 1;
+                    sprintf(s, "%02X %02X %2X", mouse_dbuf[0], mouse_dbuf[1], mouse_dbuf[2] );
+                    boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 32, 16, 32+8*8-1, 31);
+                    putfonts8_asc(binfo->vram, binfo->scrnx, 32, 16, COL8_FFFFFF, s);
+                }
             }
         }
 	}
