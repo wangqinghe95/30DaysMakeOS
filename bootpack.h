@@ -137,4 +137,27 @@ void init_pic(void);
 
 /************int.c end ********************/
 
+/******** keyboard.c && mouse.c start *****************/
+
+
+#define PORT_KEYDAT         0x0060
+#define PORT_KEYCMD         0x0064
+
+extern struct FIFO8 keyfifo;
+extern struct FIFO8 mousefifo;
+
+struct MOUSE_DEC
+{
+    unsigned char buf[3], phase;
+    int x, y, btn;
+};
+void wait_KBC_sendready(void);
+void init_keyboard(void);
+
+
+void enable_mouse(struct MOUSE_DEC *mdec);
+int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat);
+
+/******** keyboard.c && mouse.c end *****************/
+
 #endif

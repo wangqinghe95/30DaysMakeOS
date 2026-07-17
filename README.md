@@ -183,3 +183,11 @@ IDT：interrupt descriptor table，中断几率表
 
 解释了asmhead.asm 代码
 
+## Day09　内存管理
+### 01 整理源文件（harib06a）
+
+整理代码：添加 keyboard.c 和 mouse.c 文件
+
+### 02 内存容量检查（1）（harib06b）
+### 03 内存容量检查（2）（harib06c）
+### 04 挑战内存管理（harib06d）

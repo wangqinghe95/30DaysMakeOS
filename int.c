@@ -20,30 +20,6 @@ void init_pic(void)
     io_out8(PIC1_IMR, 0xff);
 }
 
-struct FIFO8 keyfifo;
-struct FIFO8 mousefifo;
-
-#define PORT_KEYDAT     0x0060
-
-void inthandler21(int* esp)
-{
-    char data;
-    io_out8(PIC0_ICW2, 0x61);
-    data = io_in8(PORT_KEYDAT);
-    fifo8_put(&keyfifo,data);
-    return;
-}
-
-void inthandler2c(int* esp)
-{
-    char data;
-    io_out8(PIC1_OCW2, 0x64);
-    io_out8(PIC0_OCW2, 0x62);
-    data = io_in8(PORT_KEYDAT);
-    fifo8_put(&mousefifo,data);
-    return;
-}
-
 void inthandler27(int* esp)
 {
     io_out8(PIC0_OCW2, 0x67);
