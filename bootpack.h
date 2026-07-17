@@ -29,6 +29,8 @@ void load_idtr(int limit, int addr);
 void asm_inthandler21(void);
 void asm_inthandler2c(void);
 void asm_inthandler27(void);
+int load_cr0();
+void store_cr0();
 /** naskfunc.asm  end ******/
 
 /****** fifo.c start  ********/
@@ -39,7 +41,7 @@ struct FIFO8
     int p, q, size, free, flags;
 };
 
-void fifo8_init(struct FIFO8* fifo, int size, char* buf);
+void fifo8_init(struct FIFO8* fifo, int size,unsigned char* buf);
 int fifo8_put(struct FIFO8* fifo, char data);
 int fifo8_get(struct FIFO8* fifo);
 int fifo8_status(struct FIFO8* fifo);

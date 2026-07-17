@@ -1,6 +1,55 @@
 #include<stdio.h>
 #include "bootpack.h"
 
+#define EFLAGS_AC_BIT           0x00040000
+#define CR0_CACHE_DISABLE       0x60000000
+
+unsigned int memtest_sub(unsigned int start, unsigned int end) 
+{
+    unsigned int i, *p, old, pat0 = 0xaa55aa55, pat1 = 0x55aa55aa;
+    for(i = start; i <= end; i += 0x1000) {
+        p = (unsigned int*)(i+0xffc);
+        old = *p;
+        *p = pat0;
+        *p ^= 0xffffffff;
+        if(*p != pat1) {
+not_memory:
+            *p = old;
+            break;
+        }
+        *p ^= 0xffffffff;
+        if(*p != pat0) {
+            goto not_memory;
+        }
+        *p = old;
+    }
+    return i;
+}
+
+unsigned int memtest(unsigned int start, unsigned int end) 
+{
+    char flg486 = 0;
+    unsigned int eflag, cr0, i;
+
+    eflag = io_load_eflags();
+    eflag |= EFLAGS_AC_BIT;
+    io_store_eflags(eflag);
+
+    if((eflag & EFLAGS_AC_BIT) != 0) {
+        flg486 = 1;
+    }
+    eflag &= ~EFLAGS_AC_BIT;
+    io_store_eflags(eflag);
+
+    i = memtest_sub(start, end);
+    if(flg486 != 0) {
+        cr0 = load_cr0();
+        cr0 &= ~CR0_CACHE_DISABLE;
+        store_cr0(cr0);
+    }
+    return i;
+}
+
 void HariMain(void)
 {
     struct BOOTINFO *binfo = (struct BOOTINFO*) 0x0ff0;
@@ -19,7 +68,8 @@ void HariMain(void)
     io_out8(PIC1_IMR, 0xef);
 
     init_keyboard();
-
+    enable_mouse(&mdec);
+    
 	init_palette();
     init_screen8(binfo->vram, binfo->scrnx, binfo->scrny);
     
@@ -33,7 +83,9 @@ void HariMain(void)
 
     putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 
-    enable_mouse(&mdec);
+    int ret = memtest(0x00400000, 0xbfffffff) / (1024*1024);
+    sprintf(s, "memory %dMB", ret);
+    putfonts8_asc(binfo->vram, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
 
 	for (;;) {
 		io_cli();
@@ -53,13 +105,13 @@ void HariMain(void)
                 io_sti();
                 if(mouse_decode(&mdec, data) != 0) {
                     sprintf(s, "[lcr %4d %4d]", mdec.x, mdec.y);
-                    if(mdec.btn & 0x01 != 0) {
+                    if((mdec.btn & 0x01) != 0) {
                         s[1] = 'L';
                     }
-                    if(mdec.btn & 0x02 != 0) {
+                    if((mdec.btn & 0x02) != 0) {
                         s[3] = 'R';
                     }
-                    if(mdec.btn & 0x01 != 0) {
+                    if((mdec.btn & 0x04) != 0) {
                         s[2] = 'C';
                     }
                     boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 32, 16, 32+15*8-1, 31);
@@ -69,20 +121,17 @@ void HariMain(void)
                     boxfill8(binfo->vram, binfo->scrnx, COL8_008484, mx, my, mx+15, my+15);
                     mx += mdec.x;
                     my += mdec.y;
+                    
+                    if(mx < 0) mx = 0;
+                    if(my < 0) my = 0;
 
-                    mx = mx < 0 ? 0 : mx;
-                    my = my < 0 ? 0 : my;
-
-                    mx = mx > binfo->scrnx - 16 ? binfo->scrnx - 16 : mx;
-                    my = mx > binfo->scrny - 16 ? binfo->scrny - 16 : mx;
+                    if(mx > binfo->scrnx - 16) mx = binfo->scrnx - 16;
+                    if(mx > binfo->scrny - 16) mx = binfo->scrny - 16;
 
                     sprintf(s, "(%3d %3d)", mx, my);
                     boxfill8(binfo->vram, binfo->scrnx, COL8_008484, 0, 0, 79, 15);
                     putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-                    putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
-
-
-                    
+                    putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);                   
                 }
             }
         }

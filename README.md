@@ -189,5 +189,8 @@ IDT：interrupt descriptor table，中断几率表
 整理代码：添加 keyboard.c 和 mouse.c 文件
 
 ### 02 内存容量检查（1）（harib06b）
+
+检查内存容量，本机结果：128MB
+
 ### 03 内存容量检查（2）（harib06c）
 ### 04 挑战内存管理（harib06d）
