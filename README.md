@@ -180,3 +180,6 @@ IDT：interrupt descriptor table，中断几率表
 实现鼠标指针效果
 
 ### 05 通往32位模式之路
+
+解释了asmhead.asm 代码
+
