@@ -31,6 +31,7 @@ void asm_inthandler2c(void);
 void asm_inthandler27(void);
 int load_cr0();
 void store_cr0();
+unsigned int memtest_sub(unsigned int start, unsigned int end);
 /** naskfunc.asm  end ******/
 
 /****** fifo.c start  ********/

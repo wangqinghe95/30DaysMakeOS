@@ -193,4 +193,7 @@ IDT：interrupt descriptor table，中断几率表
 检查内存容量，本机结果：128MB
 
 ### 03 内存容量检查（2）（harib06c）
+
+使用汇编语言重新计算内存容量
+
 ### 04 挑战内存管理（harib06d）
