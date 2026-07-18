@@ -197,3 +197,5 @@ IDT：interrupt descriptor table，中断几率表
 使用汇编语言重新计算内存容量
 
 ### 04 挑战内存管理（harib06d）
+
+管理内存分配，释放函数

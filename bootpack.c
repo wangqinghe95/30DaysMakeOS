@@ -1,54 +1,26 @@
 #include<stdio.h>
 #include "bootpack.h"
 
-#define EFLAGS_AC_BIT           0x00040000
-#define CR0_CACHE_DISABLE       0x60000000
-/*
-unsigned int memtest_sub(unsigned int start, unsigned int end) 
+#define MEMMAN_FREES        4090
+#define MEMMAN_ADDR         0x003c0000
+
+struct FREEINFO
 {
-    unsigned int i, *p, old, pat0 = 0xaa55aa55, pat1 = 0x55aa55aa;
-    for(i = start; i <= end; i += 0x1000) {
-        p = (unsigned int*)(i+0xffc);
-        old = *p;
-        *p = pat0;
-        *p ^= 0xffffffff;
-        if(*p != pat1) {
-not_memory:
-            *p = old;
-            break;
-        }
-        *p ^= 0xffffffff;
-        if(*p != pat0) {
-            goto not_memory;
-        }
-        *p = old;
-    }
-    return i;
-}*/
+    unsigned int addr, size;
+};
 
-unsigned int memtest(unsigned int start, unsigned int end) 
+struct MEMMAN
 {
-    char flg486 = 0;
-    unsigned int eflag, cr0, i;
+    int frees, maxfrees, lostsize, losts;
+    struct FREEINFO free[MEMMAN_FREES];
+};
 
-    eflag = io_load_eflags();
-    eflag |= EFLAGS_AC_BIT;
-    io_store_eflags(eflag);
+void memman_init(struct MEMMAN *man);
+unsigned int memman_total(struct MEMMAN *man);
+unsigned int memman_alloc(struct MEMMAN *man, unsigned int size);
+int memman_free(struct MEMMAN* man, unsigned int addr, unsigned int size);
 
-    if((eflag & EFLAGS_AC_BIT) != 0) {
-        flg486 = 1;
-    }
-    eflag &= ~EFLAGS_AC_BIT;
-    io_store_eflags(eflag);
-
-    i = memtest_sub(start, end);
-    if(flg486 != 0) {
-        cr0 = load_cr0();
-        cr0 &= ~CR0_CACHE_DISABLE;
-        store_cr0(cr0);
-    }
-    return i;
-}
+unsigned int memtest(unsigned int start, unsigned int end);
 
 void HariMain(void)
 {
@@ -69,6 +41,13 @@ void HariMain(void)
 
     init_keyboard();
     enable_mouse(&mdec);
+
+
+    struct MEMMAN* memman = (struct MEMMAN*)MEMMAN_ADDR;
+    unsigned int memtotal = memtest(0x00400000, 0xbffffffff);
+    memman_init(memman);
+    memman_free(memman, 0x00001000, 0x0009e000);
+    memman_free(memman, 0x00400000, memman_total - 0x00400000);
     
 	init_palette();
     init_screen8(binfo->vram, binfo->scrnx, binfo->scrny);
@@ -83,8 +62,7 @@ void HariMain(void)
 
     putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 
-    int ret = memtest(0x00400000, 0xbfffffff) / (1024*1024);
-    sprintf(s, "memory %dMB", ret);
+    sprintf(s, "memory %dMB free : %d KB", memtotal / (1024*1024), memman_total(memman)/1024);
     putfonts8_asc(binfo->vram, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
 
 	for (;;) {
@@ -138,3 +116,117 @@ void HariMain(void)
 	}
 }
 
+#define EFLAGS_AC_BIT           0x00040000
+#define CR0_CACHE_DISABLE       0x60000000
+unsigned int memtest(unsigned int start, unsigned int end)
+{
+    char flg486 = 0;
+    unsigned int eflag, cr0, i;
+
+    eflag = io_load_eflags();
+    eflag |= EFLAGS_AC_BIT;
+    io_store_eflags(eflag);
+
+    if((eflag & EFLAGS_AC_BIT) != 0) {
+        flg486 = 1;
+    }
+    eflag &= ~EFLAGS_AC_BIT;
+    io_store_eflags(eflag);
+
+    i = memtest_sub(start, end);
+    if(flg486 != 0) {
+        cr0 = load_cr0();
+        cr0 &= ~CR0_CACHE_DISABLE;
+        store_cr0(cr0);
+    }
+    return i;
+}
+
+
+void memman_init(struct MEMMAN *man)
+{
+    man->frees = 0;
+    man->maxfrees = 0;
+    man->lostsize = 0;
+    man->losts = 0;
+    return;
+}
+unsigned int memman_total(struct MEMMAN *man)
+{
+    unsigned int t = 0;
+    for(unsigned int i = 0; i < man->frees; i++) {
+        t += man->free[i].size;
+    }
+
+    return t;
+}
+unsigned int memman_alloc(struct MEMMAN *man, unsigned int size)
+{
+    for(unsigned int i = 0; i < man->frees; i++) {
+        if(man->free[i].size >= size){
+            unsigned int a = man->free[i].addr;
+            man->free[i].addr += size;
+            man->free[i].size -= size;
+            if(man->free[i].size == 0) {
+                man->frees--;
+                for(; i < man->frees; i++) {
+                    man->free[i] = man->free[i+1];
+                }
+            }
+            return a;
+        }
+    }
+    return 0;
+}
+int memman_free(struct MEMMAN* man, unsigned int addr, unsigned int size)
+{
+    int i, j;
+    for(i = 0; i < man->frees; i++) {
+        if(man->free[i].addr > addr) {
+            break;
+        }
+    }
+
+    if(i > 0) {
+        if(man->free[i].addr + man->free[i-1].size == addr) {
+            man->free[i-1].size += size;
+            if(i < man->frees) {
+                if(addr + size == man->free[i].addr){
+                    man->free[i-1].size += man->free[i].size;
+                    man->frees--;
+                    for(; i < man->frees; i++) {
+                        man->free[i] = man->free[i+1];
+                    }
+                }
+            }
+            return 0;
+        }
+    }
+
+    if(i < man->frees) {
+        if(addr + size == man->free[i].addr) {
+            man->free[i].addr = addr;
+            man->free[i].size += size;
+            return 0;
+        }
+    }
+
+    if(man->frees < MEMMAN_FREES) {
+        for(j = man->frees; j > i; j--) {
+            man->free[j] = man->free[j-1];
+        }
+
+        man->frees++;
+        if(man->maxfrees < man->frees) {
+            man->maxfrees = man->frees;
+        }
+
+        man->free[i].addr = addr;
+        man->free[i].size = size;
+        return 0;
+    }
+
+    man->losts++;
+    man->lostsize += size;
+    return -1;
+}
