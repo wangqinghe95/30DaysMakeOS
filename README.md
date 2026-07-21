@@ -218,3 +218,17 @@ IDT：interrupt descriptor table，中断几率表
 ### 04 提高叠加处理速度（2）（harib07d） 
 
 计算出刷新的范围，只在该范围内刷新
+
+
+## 第11天　制作窗口
+### 鼠标显示问题（harib08a）
+
+查看鼠标不能隐藏的显示问题
+
+### 实现画面外的支持（harib08b）
+### shtctl的指定省略（harib08c）
+### 显示窗口（harib08d）
+### 小实验（harib08e）
+### 高速计数器（harib08f）
+### 消除闪烁（1）（harib08g）
+### 消除闪烁（2）（harib08h）
