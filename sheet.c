@@ -101,15 +101,25 @@ void sheet_refreshsub(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1)
     for(int h = 0; h <= ctl->top; h++) {
         struct SHEET *sht = ctl->sheets[h];
         unsigned char* buf = sht->buf;
-        for(int by = 0; by < sht->bysize; by++) {
+
+        int bx0 = vx0 - sht->vx0;
+        int by0 = vy0 - sht->vy0;
+        int bx1 = vx1 - sht->vx0;
+        int by1 = vy1 - sht->vy0;
+
+        if(bx0 < 0) bx0 = 0;
+        if(by0 < 0) by0 = 0;
+
+        if(bx1 > sht->bxsize) bx1 = sht->bxsize;
+        if(by1 > sht->bysize) by1 = sht->bysize;
+
+        for(int by = by0; by < by1; by++) {
             int vy = sht->vy0 + by;
-            for(int bx = 0; bx < sht->bxsize; bx++) {
+            for(int bx = bx0; bx < bx1; bx++) {
                 int vx = sht->vx0 + bx;
-                if(vx0 <= vx && vx < vx1 && vy0 <= vy && vy < vy1) {
-                    unsigned char c = buf[by * sht->bxsize + bx];
-                    if(c != sht->col_inv) {
-                        vram[vy * ctl -> xsize + vx] = c;
-                    }
+                unsigned char c = buf[by * sht->bxsize + bx];
+                if(c != sht->col_inv) {
+                    vram[vy * ctl -> xsize + vx] = c;
                 }
             }
         } 
