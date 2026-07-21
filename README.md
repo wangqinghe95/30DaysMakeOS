@@ -212,4 +212,7 @@ IDT：interrupt descriptor table，中断几率表
 
 
 ### 03 提高叠加处理速度（1）（harib07c）
+
+刷新局部数据提高处理速度
+
 ### 04 提高叠加处理速度（2）（harib07d） 　
