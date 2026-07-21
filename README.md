@@ -226,6 +226,9 @@ IDT：interrupt descriptor table，中断几率表
 查看鼠标不能隐藏的显示问题
 
 ### 实现画面外的支持（harib08b）
+
+隐藏移动到窗口外的鼠标图案
+
 ### shtctl的指定省略（harib08c）
 ### 显示窗口（harib08d）
 ### 小实验（harib08e）
