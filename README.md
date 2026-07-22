@@ -230,6 +230,9 @@ IDT：interrupt descriptor table，中断几率表
 隐藏移动到窗口外的鼠标图案
 
 ### shtctl的指定省略（harib08c）
+
+SHEET 中包含 SHTCTL
+
 ### 显示窗口（harib08d）
 ### 小实验（harib08e）
 ### 高速计数器（harib08f）
