@@ -221,19 +221,22 @@ IDT：interrupt descriptor table，中断几率表
 
 
 ## 第11天　制作窗口
-### 鼠标显示问题（harib08a）
+### 01 鼠标显示问题（harib08a）
 
 查看鼠标不能隐藏的显示问题
 
-### 实现画面外的支持（harib08b）
+### 02 实现画面外的支持（harib08b）
 
 隐藏移动到窗口外的鼠标图案
 
-### shtctl的指定省略（harib08c）
+### 03 shtctl的指定省略（harib08c）
 
 SHEET 中包含 SHTCTL
 
-### 显示窗口（harib08d）
+### 04 显示窗口（harib08d）
+
+添加窗口显示函数
+
 ### 小实验（harib08e）
 ### 高速计数器（harib08f）
 ### 消除闪烁（1）（harib08g）
