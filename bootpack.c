@@ -87,16 +87,16 @@ void HariMain(void)
     sht_mouse = sheet_alloc(shtctl);
     sht_win = sheet_alloc(shtctl);
     buf_back = (unsigned char *)memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
-    buf_win = (unsigned char *)memman_alloc_4k(memman, 160 * 68);
+    buf_win = (unsigned char *)memman_alloc_4k(memman, 160 * 52);
     sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1);
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
-    sheet_setbuf(sht_win, buf_win, 160, 68, -1);
+    sheet_setbuf(sht_win, buf_win, 160, 52, -1);
 
     init_screen8((char*)buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8((char*)buf_mouse, 99);
-    make_window8(buf_win, 160, 68, "window");
-    putfonts8_asc((char*)buf_win, 160, 24, 28, COL8_000000, "welcome to");
-    putfonts8_asc((char*)buf_win, 160, 24, 44, COL8_000000, " Haribote-OS");
+    make_window8(buf_win, 160, 52, "counter");
+    // putfonts8_asc((char*)buf_win, 160, 24, 28, COL8_000000, "welcome to");
+    // putfonts8_asc((char*)buf_win, 160, 24, 44, COL8_000000, " Haribote-OS");
     sheet_slide(sht_back, 0, 0);
 
     mx = (binfo->scrnx - 16 ) / 2;
@@ -107,8 +107,8 @@ void HariMain(void)
     sheet_slide(sht_win, 80, 72);
 
     sheet_updown(sht_back, 0);
-    sheet_updown(sht_win, 2);
-    sheet_updown(sht_mouse, 1);
+    sheet_updown(sht_win, 1);
+    sheet_updown(sht_mouse, 2);
 
     sprintf(s, "(%03d %03d)",  mx, my);
 
@@ -118,10 +118,20 @@ void HariMain(void)
     putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
     sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
+	unsigned int count = 0;
+
 	for (;;) {
+		count++;
+
+		sprintf(s, "%010d", count);
+		boxfill8((char*)buf_win, 160, COL8_C6C6C6, 40, 28, 118, 43);
+		putfonts8_asc((char*)buf_win, 160, 40, 28, COL8_000000, s);
+		sheet_refresh(sht_win, 40, 28, 120, 44);
+
 		io_cli();
         if(fifo8_status(&keyfifo)+ fifo8_status(&mousefifo)  == 0 ) {
-            io_stihlt();
+            // io_stihlt();
+			io_sti();
         }
         else {
             if(fifo8_status(&keyfifo) != 0) {
