@@ -227,6 +227,12 @@ void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, in
 
 
 /*********************** timer.c start **************/
+struct TIMERCTL
+{
+    unsigned int count;
+};
+
+extern struct TIMERCTL timerctl;
 void init_pit(void);
 void inthandler20(int *esp);
 

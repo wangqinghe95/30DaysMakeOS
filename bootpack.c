@@ -119,12 +119,8 @@ void HariMain(void)
     putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
     sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
-	unsigned int count = 0;
-
 	for (;;) {
-		count++;
-
-		sprintf(s, "%010d", count);
+		sprintf(s, "%010d", timerctl.count);
 		boxfill8((char*)buf_win, 160, COL8_C6C6C6, 40, 28, 118, 43);
 		putfonts8_asc((char*)buf_win, 160, 40, 28, COL8_000000, s);
 		sheet_refresh(sht_win, 40, 28, 120, 44);
