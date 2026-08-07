@@ -47,7 +47,8 @@ hankaku.asm : hankaku.txt
 hankaku.elf : hankaku.asm
 	$(NASM) $(NAMS_FLAGS) -f elf32 -o $@ $< -l $(basename $@).lst
 
-OBJ_FILES := bootpack.obj stdio.obj dsctbl.obj graphic.obj int.obj fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj
+OBJ_FILES := bootpack.obj stdio.obj dsctbl.obj graphic.obj int.obj fifo.obj keyboard.obj \
+			mouse.obj memory.obj sheet.obj timer.obj
 
 %.obj : %.c 
 	$(CC) $(CFLAGS) -c $< -o $@

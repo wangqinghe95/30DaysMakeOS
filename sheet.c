@@ -173,7 +173,7 @@ void sheet_refreshsub(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, in
             int vy = sht->vy0 + by;
             for(int bx = bx0; bx < bx1; bx++) {
                 int vx = sht->vx0 + bx;
-                unsigned char c = buf[by * sht->bxsize + bx];
+                // unsigned char c = buf[by * sht->bxsize + bx];
                 if(map[vy * ctl->xsize + vx] == sid) {
                     vram[vy * ctl->xsize + vx] = buf[by * sht->bxsize + bx];
                 }

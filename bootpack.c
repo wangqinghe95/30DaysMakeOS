@@ -68,7 +68,8 @@ void HariMain(void)
 
     fifo8_init(&keyfifo, 32, (unsigned char*)keybuf);
     fifo8_init(&mousefifo, 128, (unsigned char*)mousebuf);
-    io_out8(PIC0_IMR, 0xf9);
+    init_pit();
+    io_out8(PIC0_IMR, 0xf8);
     io_out8(PIC1_IMR, 0xef);
 
     init_keyboard();
