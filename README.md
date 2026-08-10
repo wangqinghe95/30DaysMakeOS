@@ -284,7 +284,10 @@ SHEET 中包含 SHTCTL
 ## 第13天　定时器（2）
 ### 01 简化字符串显示（harib10a）
 
-### 重新调整FIFO缓冲区（1）（harib10b）
+### 02 重新调整FIFO缓冲区（1）（harib10b）
+
+
+
 ### 测试性能（harib10c～charib10f）
 ### 重新调整FIFO缓冲区（2）（harib10g）
 ### 加快中断处理（4）（harib10h）
