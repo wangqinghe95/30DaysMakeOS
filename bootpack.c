@@ -1,54 +1,9 @@
 #include<stdio.h>
 #include "bootpack.h"
 
-void make_window8(unsigned char* buf_win, int xsize, int ysize, char *title)
-{
-    static char closebtn[14][16] = {
-        "OOOOOOOOOOOOOOO@",
-        "OQQQQQQQQQQQQQ$@",
-        "OQQQQQQQQQQQQQ$@",
-        "OQQQ@@QQQQ@@QQ$@",
-        "OQQQQ@@QQ@@QQQ$@",
-        "OQQQQQ@@@@QQQQ$@",
-        "OQQQQQQ@@QQQQQ$@",
-        "OQQQQQ@@@@QQQQ$@",
-        "OQQQQ@@QQ@@QQQ$@",
-        "OQQQ@@QQQQ@@QQ$@",
-        "OQQQQQQQQQQQQQ$@",
-        "OQQQQQQQQQQQQQ$@",
-        "O$$$$$$$$$$$$$$@",
-        "@@@@@@@@@@@@@@@@"        
-    };
+void make_window8(unsigned char* buf_win, int xsize, int ysize, char *title);
+void putfonts8_asc_sht(struct SHEET* sht, int x, int y, int c, int b, char* s, int l);
 
-    char* buf = (char*)buf_win;
-
-    boxfill8(buf, xsize, COL8_C6C6C6,   0,              0,      xsize - 1,          0);
-    boxfill8(buf, xsize, COL8_FFFFFF,   1,              1,      xsize - 2,          1);
-    boxfill8(buf, xsize, COL8_C6C6C6,   0,              0,              0,  ysize - 1);
-    boxfill8(buf, xsize, COL8_FFFFFF,   1,              1,              1,  ysize - 2);
-    boxfill8(buf, xsize, COL8_848484,   xsize - 2,      1,      xsize - 2,  ysize - 2);
-    boxfill8(buf, xsize, COL8_000000,   xsize - 1,      0,      xsize - 1,  ysize - 1);
-    boxfill8(buf, xsize, COL8_C6C6C6,   2,              2,      xsize - 3,  ysize - 3);
-    boxfill8(buf, xsize, COL8_000084,   3,              3,      xsize - 4,         20);
-    boxfill8(buf, xsize, COL8_848484,   1,      ysize - 2,      xsize - 2,  ysize - 2);
-    boxfill8(buf, xsize, COL8_000000,   0,      ysize - 1,      xsize - 1,  ysize - 1);
-
-    putfonts8_asc(buf, xsize, 24, 4, COL8_FFFFFF, title);
-
-    for(int y = 0; y < 14; y++) {
-        for(int x = 0; x < 16; x++) {
-            char c = closebtn[y][x];
-            if(c == '@') c = COL8_000000;
-            else if(c == '$') c = COL8_008484;
-            else if(c == 'Q') c = COL8_C6C6C6;
-            else c = COL8_FFFFFF;
-            
-            buf[(5+y) * xsize + (xsize - 21 + x)] = c;
-        }
-    }
-
-    return;
-}
 
 void HariMain(void)
 {
@@ -116,8 +71,6 @@ void HariMain(void)
     init_screen8((char*)buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8((char*)buf_mouse, 99);
     make_window8(buf_win, 160, 52, "counter");
-    // putfonts8_asc((char*)buf_win, 160, 24, 28, COL8_000000, "welcome to");
-    // putfonts8_asc((char*)buf_win, 160, 24, 44, COL8_000000, " Haribote-OS");
     sheet_slide(sht_back, 0, 0);
 
     mx = (binfo->scrnx - 16 ) / 2;
@@ -131,19 +84,15 @@ void HariMain(void)
     sheet_updown(sht_mouse, 2);
 
     sprintf(s, "(%03d %03d)",  mx, my);
-
-    putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-
+    putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
+    
     sprintf(s, "memory %d MB free : %d KB", memtotal / (1024*1024), memman_total(memman)/1024);
-    putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 32, COL8_FFFFFF, s);
-    sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
+    putfonts8_asc_sht(sht_back, 0, 32, COL8_FFFFFF, COL8_008484, s, 40);
 
 	for (;;) {
 		sprintf(s, "%010d", timerctl.count);
-		boxfill8((char*)buf_win, 160, COL8_C6C6C6, 40, 28, 118, 43);
-		putfonts8_asc((char*)buf_win, 160, 40, 28, COL8_000000, s);
-		sheet_refresh(sht_win, 40, 28, 120, 44);
-
+        putfonts8_asc_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 10);
+        
 		io_cli();
         if(fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo)
                 + fifo8_status(&timerfifo2) +  fifo8_status(&timerfifo3)  == 0 ) {
@@ -155,9 +104,8 @@ void HariMain(void)
                 int data = fifo8_get(&keyfifo);
                 io_sti();
                 sprintf(s, "%02X", data);
-                boxfill8((char*)buf_back, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
-                putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 16, COL8_FFFFFF, s);
-                sheet_refresh(sht_back, 0, 16, 16, 32);
+                putfonts8_asc_sht(sht_back, 0, 16, COL8_FFFFFF, COL8_848484, s, 2);
+                    
             }
             else if(fifo8_status(&mousefifo) != 0) {
                 int data = fifo8_get(&mousefifo);
@@ -173,12 +121,9 @@ void HariMain(void)
                     if((mdec.btn & 0x04) != 0) {
                         s[2] = 'C';
                     }
-                    boxfill8((char*)buf_back, binfo->scrnx, COL8_008484, 32, 16, 32+15*8-1, 31);
-                    putfonts8_asc((char*)buf_back, binfo->scrnx, 32, 16, COL8_FFFFFF, s);
-                    sheet_refresh(sht_back, 32, 16, 32+15*8-1, 32);
+                    putfonts8_asc_sht(sht_back, 32, 16, COL8_FFFFFF, COL8_848484, s, 15);
                     
                     // move mouse
-                    // boxfill8(binfo->vram, binfo->scrnx, COL8_008484, mx, my, mx+15, my+15);
                     mx += mdec.x;
                     my += mdec.y;
                     
@@ -189,9 +134,7 @@ void HariMain(void)
                     if(my > binfo->scrny - 1) my = binfo->scrny - 1;
 
                     sprintf(s, "(%3d %3d)", mx, my);
-                    boxfill8((char*)buf_back, binfo->scrnx, COL8_008484, 0, 0, 79, 15);
-                    putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-                    sheet_refresh(sht_back, 0, 0, 80, 16);
+                    putfonts8_asc_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_848484, s, 10);
 
                     sheet_slide(sht_mouse, mx, my);                  
                 }
@@ -199,14 +142,13 @@ void HariMain(void)
             else if(fifo8_status(&timerfifo) != 0) {
                 int data = fifo8_get(&timerfifo);
                 io_sti();
-                putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 64, COL8_FFFFFF, "10[sec]");
-                sheet_refresh(sht_back, 0, 64, 56, 80);
+                putfonts8_asc_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_848484, "10[sec]", 7);
+
             }
             else if(fifo8_status(&timerfifo2) != 0) {
                 int data = fifo8_get(&timerfifo2);
                 io_sti();
-                putfonts8_asc((char*)buf_back, binfo->scrnx, 0, 80, COL8_FFFFFF, "3[sec]");
-                sheet_refresh(sht_back, 0, 80, 48, 96);
+                putfonts8_asc_sht(sht_back, 0, 80, COL8_FFFFFF, COL8_848484 ,"3[sec]", 6);
             }
             else if(fifo8_status(&timerfifo3) != 0) {
                 int data = fifo8_get(&timerfifo3);
@@ -223,4 +165,62 @@ void HariMain(void)
             }
         }
 	}
+}
+
+
+void make_window8(unsigned char* buf_win, int xsize, int ysize, char *title)
+{
+    static char closebtn[14][16] = {
+        "OOOOOOOOOOOOOOO@",
+        "OQQQQQQQQQQQQQ$@",
+        "OQQQQQQQQQQQQQ$@",
+        "OQQQ@@QQQQ@@QQ$@",
+        "OQQQQ@@QQ@@QQQ$@",
+        "OQQQQQ@@@@QQQQ$@",
+        "OQQQQQQ@@QQQQQ$@",
+        "OQQQQQ@@@@QQQQ$@",
+        "OQQQQ@@QQ@@QQQ$@",
+        "OQQQ@@QQQQ@@QQ$@",
+        "OQQQQQQQQQQQQQ$@",
+        "OQQQQQQQQQQQQQ$@",
+        "O$$$$$$$$$$$$$$@",
+        "@@@@@@@@@@@@@@@@"        
+    };
+
+    char* buf = (char*)buf_win;
+
+    boxfill8(buf, xsize, COL8_C6C6C6,   0,              0,      xsize - 1,          0);
+    boxfill8(buf, xsize, COL8_FFFFFF,   1,              1,      xsize - 2,          1);
+    boxfill8(buf, xsize, COL8_C6C6C6,   0,              0,              0,  ysize - 1);
+    boxfill8(buf, xsize, COL8_FFFFFF,   1,              1,              1,  ysize - 2);
+    boxfill8(buf, xsize, COL8_848484,   xsize - 2,      1,      xsize - 2,  ysize - 2);
+    boxfill8(buf, xsize, COL8_000000,   xsize - 1,      0,      xsize - 1,  ysize - 1);
+    boxfill8(buf, xsize, COL8_C6C6C6,   2,              2,      xsize - 3,  ysize - 3);
+    boxfill8(buf, xsize, COL8_000084,   3,              3,      xsize - 4,         20);
+    boxfill8(buf, xsize, COL8_848484,   1,      ysize - 2,      xsize - 2,  ysize - 2);
+    boxfill8(buf, xsize, COL8_000000,   0,      ysize - 1,      xsize - 1,  ysize - 1);
+
+    putfonts8_asc(buf, xsize, 24, 4, COL8_FFFFFF, title);
+
+    for(int y = 0; y < 14; y++) {
+        for(int x = 0; x < 16; x++) {
+            char c = closebtn[y][x];
+            if(c == '@') c = COL8_000000;
+            else if(c == '$') c = COL8_008484;
+            else if(c == 'Q') c = COL8_C6C6C6;
+            else c = COL8_FFFFFF;
+            
+            buf[(5+y) * xsize + (xsize - 21 + x)] = c;
+        }
+    }
+
+    return;
+}
+
+void putfonts8_asc_sht(struct SHEET* sht, int x, int y, int c, int b, char* s, int l)
+{
+    boxfill8((char*)sht->buf, sht->bxsize, b, x, y, x + l * 8 - 1,  y + 15);
+    putfonts8_asc((char*)sht->buf, sht->bxsize, x, y, c, s);
+    sheet_refresh(sht, x, y, x + l * 8, y + 16);
+    return;
 }
