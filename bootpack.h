@@ -245,12 +245,13 @@ struct TIMER
     unsigned int timeout, flags;
     struct FIFO32* fifo;
     int data;
+    struct TIMER* next;
 };
 
 struct TIMERCTL
 {
     unsigned int count, next, using;
-    struct TIMER *timers[MAX_TIMER];
+    struct TIMER *t0;
     struct TIMER timers0[MAX_TIMER];
 };
 

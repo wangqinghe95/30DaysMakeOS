@@ -42,10 +42,10 @@ void HariMain(void)
     timer_settime(timer3, 50);
 
     struct MEMMAN* memman = (struct MEMMAN*)MEMMAN_ADDR;
-    unsigned int memtotal = memtest(0x00400000, (unsigned int)0xbffffffff);
+    unsigned int memtotal = memtest(0x00400000, (unsigned int)0xbfffffff);
     memman_init(memman);
     memman_free(memman, 0x00001000, 0x0009e000);
-    memman_free(memman, 0x00400000, (unsigned int)(memman_total - 0x00400000));
+    memman_free(memman, 0x00400000, (unsigned int)(memtotal - 0x00400000));
     
 	init_palette();
     shtctl = shtctl_init(memman, (unsigned char*)binfo->vram, binfo->scrnx, binfo->scrny);
