@@ -11,14 +11,28 @@ VRAM	EQU		0x0ff8      ; 图像缓冲区的起始地址
 
     ORG     0xc200
 
-    MOV     AL, 0x13        ; VGA 显卡，320*200*8
-    MOV     AH, 0x00
+    MOV     BX, 0x4101        ; VGA 显卡，320*200*8
+    MOV     AX, 0x4f02
     INT     0x10
 
     MOV     BYTE    [VMODE],8
-    MOV     WORD    [SCRNX],320
-    MOV     WORD    [SCRNY],200
-    MOV     DWORD   [VRAM], 0x000a0000
+    MOV     WORD    [SCRNX],640
+    MOV     WORD    [SCRNY],480
+
+; Query VBE Mode Info
+		MOV		AX,0x9000
+		MOV		ES,AX
+		MOV		DI,0
+		MOV		AX,0x4f00       ; VBE Get Mode Info
+		INT		0x10
+
+		MOV		CX,0x101
+		MOV		AX,0x4f01
+		INT		0x10
+
+; Store VRAM address
+		MOV		EAX,[ES:DI+0x28] ; Get linear framebuffer address
+		MOV		[VRAM],EAX
 
     ; 用 BIOS 获取键盘上各种 LED 指示灯状态
     MOV     AH,0x02
@@ -39,8 +53,6 @@ VRAM	EQU		0x0ff8      ; 图像缓冲区的起始地址
     MOV     AL,0xdf
     OUT     0x60,AL
     CALL    waitkbdout
-
-
 
 		LGDT	[GDTR0]			
 		MOV		EAX,CR0
