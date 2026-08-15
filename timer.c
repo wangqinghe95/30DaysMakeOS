@@ -14,10 +14,17 @@ void init_pit(void)
     io_out8(PIT_CNT0, 0x9c);
     io_out8(PIT_CNT0, 0x2e);
     timerctl.count = 0;
-    timerctl.next = 0xffffffff;
     for(int i = 0; i < MAX_TIMER; ++i) {
         timerctl.timers0[i].flags = 0;
     }
+
+    struct TIMER* t = timer_alloc();
+    t->timeout = 0xffffffff;
+    t->flags = TIMER_FLAGS_USING;
+
+    t->next = 0;
+    timerctl.t0 = t;
+    timerctl.next = 0xffffffff;
     return;
 }
 
@@ -53,15 +60,6 @@ void timer_settime(struct TIMER* timer, unsigned int timeout)
     int e = io_load_eflags();
     io_cli();
 
-    timerctl.using++;
-    if(timerctl.using == 1) {
-        timerctl.t0 = timer;
-        timer->next = 0;
-        timerctl.next = timer->timeout;
-        io_store_eflags(e);
-        return;
-    }
-
     struct TIMER *t = timerctl.t0;
 
     if(timer->timeout <= t->timeout) {
@@ -76,8 +74,6 @@ void timer_settime(struct TIMER* timer, unsigned int timeout)
     for(;;) {
         s = t;
         t = t->next;
-        if(0 == t) break;
-
         if(timer->timeout <= t->timeout) {
             s->next = timer;
             timer->next = t;
@@ -86,9 +82,6 @@ void timer_settime(struct TIMER* timer, unsigned int timeout)
         }
     }
 
-    s->next = timer;
-    timer->next = 0;
-    io_store_eflags(e);
     return;
 }
 
@@ -100,9 +93,8 @@ void inthandler20(int *esp)
 
     if(timerctl.next > timerctl.count) return;
 
-    int i = 0;
     struct TIMER* timer = timerctl.t0;
-    for(; i < timerctl.using; i++) {
+    for(;;) {
         if(timer->timeout > timerctl.count) {
             break;
         }
@@ -111,16 +103,8 @@ void inthandler20(int *esp)
         timer = timer->next;
     }
     
-    timerctl.using -= i;
-
     timerctl.t0 = timer;
-
-    if(timerctl.using > 0) {
-        timerctl.next = timerctl.t0->timeout;
-    }
-    else {
-        timerctl.next = 0xffffffff;
-    }
+    timerctl.next = timerctl.t0->timeout;
 
     return;
 }
