@@ -309,7 +309,10 @@ SHEET 中包含 SHTCTL
 修改 asmhead.asm 文件
 本章和书中代码差别很大，单纯根据书中代码加入是不生效的。
 
-### 提高分辨率（2）（harib11e）
+### 03 提高分辨率（2）（harib11e）
+
+修改 asmhead.asm 使用VBE显卡
+
 ### 键盘输入（1）（harib11f）
 ### 键盘输入（2）（harib11g）
 ### 追记内容（1）（harib11h）

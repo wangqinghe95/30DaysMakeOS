@@ -1,3 +1,7 @@
+; haribote-os asm
+
+VBEMODE EQU 0x105
+
 BOTPAK	EQU		0x00280000
 DSKCAC	EQU		0x00100000
 DSKCAC0	EQU		0x00008000
@@ -11,14 +15,6 @@ VRAM	EQU		0x0ff8      ; 图像缓冲区的起始地址
 
     ORG     0xc200
 
-    MOV     BX, 0x4101        ; VGA 显卡，320*200*8
-    MOV     AX, 0x4f02
-    INT     0x10
-
-    MOV     BYTE    [VMODE],8
-    MOV     WORD    [SCRNX],640
-    MOV     WORD    [SCRNY],480
-
 ; Query VBE Mode Info
 		MOV		AX,0x9000
 		MOV		ES,AX
@@ -26,33 +22,69 @@ VRAM	EQU		0x0ff8      ; 图像缓冲区的起始地址
 		MOV		AX,0x4f00       ; VBE Get Mode Info
 		INT		0x10
 
-		MOV		CX,0x101
-		MOV		AX,0x4f01
+		CMP		AX, 0x004f
+		JNE		scrn320
+
+		MOV		AX, [ES:DI+4]
+		CMP		AX, 0x0200
+		JB		scrn320
+
+		MOV		CX,	VBEMODE
+		MOV		AX, 0x4f01
 		INT		0x10
+		CMP		AX, 0x004f
+		JNE		scrn320
 
-; Store VRAM address
-		MOV		EAX,[ES:DI+0x28] ; Get linear framebuffer address
-		MOV		[VRAM],EAX
+		CMP		BYTE	[ES:DI + 0x19], 8
+		JNE		scrn320
+		CMP		BYTE	[ES:DI + 0x1b], 4
+		JNE		scrn320
+		MOV		AX, [ES:DI + 0x00]
+		AND		AX, 0x0080
+		JZ		scrn320
 
-    ; 用 BIOS 获取键盘上各种 LED 指示灯状态
-    MOV     AH,0x02
-    INT     0x16
-    MOV     [LEDS],AL
+		MOV		BX, VBEMODE + 0x4000
+		MOV		AX, 0x4f02
+		INT		0x10
+		MOV		BYTE	[VMODE], 8
+		MOV		AX, [ES:DI + 0x12]
+		MOV		[SCRNX], AX
+		MOV		AX, [ES:DI + 0x14]
+		MOV		[SCRNY], AX
+		MOV		EAX, [ES:DI + 0x28]
+		MOV		[VRAM], EAX
+		JMP		keystatus
 
-    MOV     AL,0xff
-    OUT     0x21,AL
-    NOP
-    OUT     0xa1,AL
+scrn320:
+		MOV		AL, 0x13
+		MOV		AH, 0x00
+		INT		0x10
+		MOV		BYTE [VMODE], 8
+		MOV		WORD [SCRNX], 320
+		MOV		WORD [SCRNY], 200
+		MOV		DWORD	[VRAM], 0x000a0000
 
-    CLI
 
-    CALL    waitkbdout
-    MOV     AL,0xd1
-    OUT     0x64,AL
-    CALL    waitkbdout
-    MOV     AL,0xdf
-    OUT     0x60,AL
-    CALL    waitkbdout
+; 用 BIOS 获取键盘上各种 LED 指示灯状态
+keystatus:
+		MOV 	AH, 0x02
+		INT		0x16
+		MOV		[LEDS], AL
+
+		MOV     AL,0xff
+		OUT     0x21,AL
+		NOP
+		OUT     0xa1,AL
+
+		CLI
+
+		CALL    waitkbdout
+		MOV     AL,0xd1
+		OUT     0x64,AL
+		CALL    waitkbdout
+		MOV     AL,0xdf
+		OUT     0x60,AL
+		CALL    waitkbdout
 
 		LGDT	[GDTR0]			
 		MOV		EAX,CR0
@@ -60,6 +92,7 @@ VRAM	EQU		0x0ff8      ; 图像缓冲区的起始地址
 		OR		EAX,0x00000001
 		MOV		CR0,EAX
 		JMP		pipelineflush
+
 pipelineflush:
 		MOV		AX,1*8			
 		MOV		DS,AX
